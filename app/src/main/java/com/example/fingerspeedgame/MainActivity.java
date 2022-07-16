@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        showToast("on destroy method called");
+        showToast("on destroy method called", Toast.LENGTH_SHORT);
 
     }
 
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        showToast("on saveInstance called");
+        showToast("on saveInstance called", Toast.LENGTH_SHORT);
 
         outState.putInt(REMAINING_TIME_KEY, remainingTime);
         outState.putInt(A_THOUSAND_KEY, aThousand);
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        showToast("on create method called");
+        showToast("on create method called", Toast.LENGTH_SHORT);
 
         timerTextView = findViewById(R.id.txtTimer);
         aThousandTextView = findViewById(R.id.txtAThousand);
@@ -210,8 +212,29 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+    private void showToast(String message, int duration) {
+        Toast.makeText(this,message,duration).show();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu, menu);
+
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId() == R.id.info_item) {
+
+            showToast("Application version " + BuildConfig.VERSION_NAME, Toast.LENGTH_LONG);
+
+        }
+
+        return true;
+
+    }
 }
