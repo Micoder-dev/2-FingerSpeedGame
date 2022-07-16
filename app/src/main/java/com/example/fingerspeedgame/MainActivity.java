@@ -1,5 +1,6 @@
 package com.example.fingerspeedgame;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,16 +25,50 @@ public class MainActivity extends AppCompatActivity {
 
     private int aThousand = 10;
 
+    private final String REMAINING_TIME_KEY = "remaining time key";
+    private final String A_THOUSAND_KEY = "a thousand key";
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        showToast("on destroy method called");
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        showToast("on saveInstance called");
+
+        outState.putInt(REMAINING_TIME_KEY, remainingTime);
+        outState.putInt(A_THOUSAND_KEY, aThousand);
+        countDownTimer.cancel();
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        showToast("on create method called");
 
         timerTextView = findViewById(R.id.txtTimer);
         aThousandTextView = findViewById(R.id.txtAThousand);
         tapTapButton = findViewById(R.id.btnTap);
 
         aThousandTextView.setText(aThousand + "");
+
+        if (savedInstanceState != null) {
+
+            remainingTime = savedInstanceState.getInt(REMAINING_TIME_KEY);
+            aThousand = savedInstanceState.getInt(A_THOUSAND_KEY);
+
+            restoreTheGame();
+
+        }
 
         tapTapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +90,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        countDownTimer = new CountDownTimer(initialCountDownInMillis, timerInterval) {
+        if (savedInstanceState == null) {
+            countDownTimer = new CountDownTimer(initialCountDownInMillis, timerInterval) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+
+                    remainingTime = (int) millisUntilFinished / 1000;
+                    timerTextView.setText(remainingTime + "");
+
+                }
+
+                @Override
+                public void onFinish() {
+
+                    Toast.makeText(MainActivity.this, "CountDown Finished", Toast.LENGTH_SHORT).show();
+
+                    showAlert("Not Intresting", "would you like to try again?");
+
+                }
+            };
+
+            countDownTimer.start();
+        }
+
+    }
+
+    private void restoreTheGame() {
+
+        int restoredRemainingTime = remainingTime;
+        int restoredAThousand = aThousand;
+
+        timerTextView.setText(restoredRemainingTime + "");
+        aThousandTextView.setText(restoredAThousand + "");
+
+        countDownTimer = new CountDownTimer((long) remainingTime * 1000, timerInterval) {
             @Override
             public void onTick(long millisUntilFinished) {
 
@@ -67,9 +135,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
 
-                Toast.makeText(MainActivity.this, "CountDown Finished", Toast.LENGTH_SHORT).show();
-
-                    showAlert("Not Intresting", "would you like to try again?");
+                showAlert("Finished", "would you like to reset the game?");
 
             }
         };
@@ -143,4 +209,9 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.setCanceledOnTouchOutside(false);
 
     }
+
+    private void showToast(String message) {
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+    }
+
 }
